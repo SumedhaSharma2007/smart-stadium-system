@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modi Stadium – Interactive Seating Map</title>
+  <meta name="description" content="Interactive seating map for Modi Stadium, Ahmedabad – World's Largest Cricket Stadium.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="smart_stadium.css">
+</head>
+<body>
+
+<!-- ═══════════════════ ONBOARDING MODAL ═══════════════════ -->
+<div id="onboarding-overlay">
+  <div id="onboarding-modal">
+    <div id="ob-glow-ring"></div>
+    <div id="ob-header">
+      <div id="ob-icon">🏟️</div>
+      <h2 id="ob-title">Welcome to the Arena</h2>
+      <p id="ob-subtitle">Tell us about yourself to personalize your stadium experience</p>
+    </div>
+
+    <form id="onboarding-form" novalidate>
+
+      <!-- Name -->
+      <div class="ob-field">
+        <label class="ob-label" for="ob-name"><i class="fa-solid fa-user"></i> Your Name</label>
+        <div class="input-wrapper">
+          <input class="ob-input" id="ob-name" type="text" placeholder="e.g. Rahul Sharma" autocomplete="given-name" required>
+          <div class="input-clear-btn" data-target="ob-name"><i class="fa-solid fa-circle-xmark"></i></div>
+        </div>
+        <span class="ob-err" id="err-name">Please enter your name</span>
+      </div>
+
+      <!-- Venue -->
+      <div class="ob-field">
+        <label class="ob-label" for="ob-venue"><i class="fa-solid fa-location-dot"></i> Select Venue</label>
+        <div class="ob-select-wrap">
+          <select class="ob-input ob-select" id="ob-venue" required>
+            <option value="" disabled selected>Choose a venue…</option>
+            <option value="Modi Stadium">🏟 Modi Stadium — Ahmedabad (1,32,000)</option>
+            <option value="Jawaharlal Nehru Stadium Delhi">🏟 Jawaharlal Nehru Stadium Delhi — Delhi (60,254)</option>
+          </select>
+          <i class="fa-solid fa-chevron-down ob-select-arrow"></i>
+        </div>
+        <span class="ob-err" id="err-venue">Please select a venue</span>
+      </div>
+
+      <!-- Row: Group size + Seat -->
+      <div class="ob-row">
+        <div class="ob-field">
+          <label class="ob-label" for="ob-group"><i class="fa-solid fa-users"></i> People with You</label>
+          <input class="ob-input" id="ob-group" type="number" placeholder="0" min="0" max="99" value="0">
+        </div>
+        <div class="ob-field">
+          <label class="ob-label">Seat Number <span style="font-size:0.7rem;opacity:0.6">(Optional)</span></label>
+          <div class="input-wrapper">
+            <input type="text" id="ob-seat" class="ob-input" placeholder="e.g. A-12">
+            <div class="input-clear-btn" data-target="ob-seat"><i class="fa-solid fa-circle-xmark"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="ob-submit">
+        <span id="ob-btn-text"><i class="fa-solid fa-rocket"></i> Enter the Stadium</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════ WELCOME BANNER ═══════════════════ -->
+<div id="welcome-banner" style="display:none">
+  <div id="wb-left">
+    <span id="wb-avatar"></span>
+    <div id="wb-info">
+      <div id="wb-greeting">Welcome back!</div>
+      <div id="wb-details"></div>
+    </div>
+  </div>
+  <div id="wb-right">
+    <div id="wb-tags"></div>
+    <button id="wb-close" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+</div>
+
+<!-- ═══════════════════ ALERT TOAST ═══════════════════ -->
+<div id="alert-toast" style="display:none">
+  <div id="at-icon"></div>
+  <div id="at-body">
+    <div id="at-title"></div>
+    <div id="at-msg"></div>
+  </div>
+  <div id="at-countdown"><div id="at-countdown-bar"></div></div>
+  <button id="at-close" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<!-- ═══════════════════ TOP BAR ═══════════════════ -->
+<header id="top-bar">
+  <div id="stadium-brand">
+    <div>
+      <h1 id="stadium-title">Modi Stadium</h1>
+      <p id="stadium-subtitle">Ahmedabad · Capacity: 1,32,000</p>
+    </div>
+    <button id="switch-venue-btn" title="Switch Venue"><i class="fa-solid fa-arrows-rotate"></i> Switch Venue</button>
+  </div>
+
+  <div id="search-container">
+    <div id="search-wrapper">
+      <i class="fa-solid fa-magnifying-glass" id="search-icon-el"></i>
+      <input id="search-input" type="text" placeholder='Block A, Gate 5, or Seat "A-45"…' autocomplete="off" spellcheck="false">
+      <button id="search-clear" title="Clear" style="display:none"><i class="fa-solid fa-xmark"></i></button>
+      <button id="search-btn" title="Search"><i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+    <div id="search-dropdown" class="hidden"></div>
+    <div id="search-error" class="hidden">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span id="error-text">Invalid input. Please check and try again.</span>
+    </div>
+  </div>
+
+  <div id="top-stats">
+    <div class="top-stat"><span class="tsv" id="cap-val">1,32,000</span><span class="tsl">Capacity</span></div>
+    <div class="ts-div"></div>
+    <div class="top-stat"><span class="tsv" id="live-crowd">94,212</span><span class="tsl">Live Crowd</span></div>
+    <div class="ts-div"></div>
+    <div class="top-stat"><span class="tsv" id="gates-val">9</span><span class="tsl">Gates</span></div>
+    <div class="ts-div"></div>
+    <div class="top-stat"><span class="tsv" id="blocks-val">18</span><span class="tsl">Blocks</span></div>
+    <div class="ts-div"></div>
+    <div id="weather-chip"><span id="weather-icon">☀️</span><span id="weather-label">Sunny</span></div>
+    <div class="ts-div"></div>
+    <div id="security-chip"><span id="security-dot"></span><span id="security-label">Secure</span></div>
+  </div>
+</header>
+
+<!-- ═══════════════════ MAIN LAYOUT ═══════════════════ -->
+<div id="main-layout">
+
+  <!-- ── LEFT PANEL ── -->
+  <aside id="left-panel">
+    <div class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-layer-group"></i> Categories</h3>
+      <div id="category-legend"></div>
+    </div>
+
+    <div class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-circle-check"></i> Availability</h3>
+      <div class="legend-list">
+        <div class="legend-item"><span class="avail-dot ad-avail"></span><span>Available</span><span class="avail-count" id="cnt-avail">–</span></div>
+        <div class="legend-item"><span class="avail-dot ad-limit"></span><span>Limited</span><span class="avail-count" id="cnt-limit">–</span></div>
+        <div class="legend-item"><span class="avail-dot ad-full"></span><span>Full</span><span class="avail-count" id="cnt-full">–</span></div>
+      </div>
+    </div>
+
+    <div class="panel-card" id="heat-legend-card" style="display:none">
+      <h3 class="panel-title"><i class="fa-solid fa-fire"></i> Crowd Density</h3>
+      <div class="heat-scale">
+        <span class="heat-lo">Low</span>
+        <div class="heat-bar"></div>
+        <span class="heat-hi">High</span>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Tools</h3>
+      <div class="action-buttons">
+        <button class="action-btn primary" id="best-seat-btn"><i class="fa-solid fa-star"></i> Find Best Seat</button>
+        <button class="action-btn" id="heatmap-btn"><i class="fa-solid fa-fire-flame-curved"></i> Crowd Heatmap</button>
+        <button class="action-btn" id="toilet-btn"><i class="fa-solid fa-restroom"></i> Show Toilets</button>
+        <button class="action-btn" id="parking-btn"><i class="fa-solid fa-square-parking"></i> Show Parking</button>
+        <button class="action-btn" id="reset-btn"><i class="fa-solid fa-rotate-left"></i> Reset View</button>
+      </div>
+    </div>
+
+    <!-- ── LOCATION CARD ── -->
+    <div class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-location-crosshairs"></i> My Location</h3>
+      <button class="action-btn primary" id="use-location-btn"><i class="fa-solid fa-circle-dot"></i> Use My Location</button>
+      <div id="loc-status"></div>
+      <div class="ob-field" style="margin-top:10px">
+        <label class="ob-label" style="font-size:.62rem"><i class="fa-solid fa-hand-pointer"></i> Manual Override</label>
+        <div class="ob-select-wrap">
+          <select id="manual-location-sel" class="ob-input ob-select" style="font-size:.76rem;padding:7px 10px">
+            <option value="">-- Select Position --</option>
+            <option value="outside">🌐 Outside Stadium</option>
+            <optgroup label="Lower Ring">
+              <option value="A">Block A</option><option value="B">Block B</option>
+              <option value="C">Block C</option><option value="D">Block D</option>
+              <option value="E">Block E</option><option value="F">Block F</option>
+              <option value="G">Block G</option><option value="H">Block H</option>
+            </optgroup>
+            <optgroup label="Upper Ring">
+              <option value="J">Block J</option><option value="K">Block K</option>
+              <option value="L">Block L</option><option value="M">Block M</option>
+              <option value="N">Block N</option><option value="P">Block P</option>
+              <option value="Q">Block Q</option><option value="R">Block R</option>
+            </optgroup>
+          </select>
+          <i class="fa-solid fa-chevron-down ob-select-arrow"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GATE WAIT TIMES ── -->
+    <div class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-clock"></i> Gate Wait Times</h3>
+      <div id="gate-wait-list"></div>
+    </div>
+
+    <!-- ── SMART TIPS ── -->
+    <div class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-lightbulb"></i> Smart Tips</h3>
+      <div id="smart-tips-list"></div>
+    </div>
+  </aside>
+
+  <!-- ── CENTER MAP ── -->
+  <main id="map-panel">
+    <div id="map-controls">
+      <button class="map-ctrl" id="zoom-in-btn" title="Zoom In"><i class="fa-solid fa-plus"></i></button>
+      <button class="map-ctrl" id="zoom-out-btn" title="Zoom Out"><i class="fa-solid fa-minus"></i></button>
+      <button class="map-ctrl" id="zoom-reset-btn" title="Fit"><i class="fa-solid fa-expand"></i></button>
+    </div>
+
+    <div id="svg-viewport">
+      <svg id="stadium-svg" viewBox="0 0 750 510" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="strong-glow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="field-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22c55e"/>
+            <stop offset="50%" stop-color="#16a34a"/>
+            <stop offset="100%" stop-color="#14532d"/>
+          </radialGradient>
+        </defs>
+        <g id="map-root"></g>
+      </svg>
+    </div>
+
+    <div id="map-footer">
+      <span id="zoom-label">100 %</span>
+      <span id="hover-info">Hover over a section to explore</span>
+    </div>
+  </main>
+
+  <!-- ── RIGHT PANEL ── -->
+  <aside id="right-panel">
+    <!-- No selection -->
+    <div id="state-none">
+      <div id="none-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+      <p id="none-title">Select a Section</p>
+      <p id="none-sub">Click any block or gate, or use the search bar above</p>
+    </div>
+
+    <!-- Block selected -->
+    <div id="state-block" style="display:none">
+      <div id="sel-header">
+        <div id="sel-badge">Block A</div>
+        <span id="sel-status" class="status-badge sb-avail">Available</span>
+      </div>
+      <div id="sel-cat-tag"><span id="sel-cat-name">–</span></div>
+
+      <div class="detail-list">
+        <div class="detail-row"><i class="fa-solid fa-couch"></i><span>Seats</span><strong id="d-seats">–</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-door-open"></i><span>Nearest Gate</span><strong id="d-gate">–</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-layer-group"></i><span>Tier</span><strong id="d-tier">–</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-users"></i><span>Occupancy</span><strong id="d-occ">–</strong></div>
+      </div>
+
+      <div id="occ-wrap"><div id="occ-bar"><div id="occ-fill"></div></div></div>
+      <p id="sel-desc">–</p>
+
+      <div id="sel-actions">
+        <button class="act-btn" id="show-gate-btn"><i class="fa-solid fa-route"></i> Gate Path</button>
+        <button class="act-btn secondary" id="desel-btn"><i class="fa-solid fa-xmark"></i> Clear</button>
+      </div>
+
+      <div id="seat-checker">
+        <p class="sc-label">Check Specific Seat</p>
+        <div id="seat-row">
+          <input type="number" id="seat-input" placeholder="Seat #" min="1">
+          <button id="seat-check-btn"><i class="fa-solid fa-check"></i></button>
+        </div>
+        <div id="seat-result"></div>
+      </div>
+    </div>
+
+    <!-- Gate selected -->
+    <div id="state-gate" style="display:none">
+      <div id="gate-badge-wrap"><div id="gate-badge">Gate 1</div></div>
+      <div class="detail-list">
+        <div class="detail-row"><i class="fa-solid fa-map-pin"></i><span>Location</span><strong id="g-loc">–</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-signs-post"></i><span>Serves Blocks</span><strong id="g-blocks">–</strong></div>
+      </div>
+      <button class="act-btn secondary" id="desel-gate-btn"><i class="fa-solid fa-xmark"></i> Clear</button>
+    </div>
+
+    <!-- Best seats -->
+    <div id="state-best" style="display:none">
+      <h3 id="best-title"><i class="fa-solid fa-star"></i> Best Available Seats</h3>
+      <div id="best-list"></div>
+      <button class="act-btn secondary" id="close-best-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+    </div>
+
+    <!-- ── NAVIGATION STATE ── -->
+    <div id="state-nav" style="display:none">
+      <div id="nav-header">
+        <div id="nav-header-icon"><i class="fa-solid fa-route"></i></div>
+        <div>
+          <div id="nav-title-text">Navigation</div>
+          <div id="nav-subtitle">Route from your location</div>
+        </div>
+      </div>
+      <div id="nav-suggestion"></div>
+      <button class="act-btn secondary" id="nav-close-btn"><i class="fa-solid fa-xmark"></i> Clear Location</button>
+    </div>
+
+    <!-- ── HELPLINE & SECURITY (always visible) ── -->
+    <div id="helpline-card" class="panel-card">
+      <h3 class="panel-title"><i class="fa-solid fa-phone-volume"></i> Helpline &amp; Security</h3>
+      <div id="security-status-badge"></div>
+      <div class="detail-list" style="margin-top:4px">
+        <div class="detail-row"><i class="fa-solid fa-headset" style="color:#6366f1"></i><span>Helpline</span><strong>1800-STADIUM</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-shield-halved" style="color:#3b82f6"></i><span>Police</span><strong>100</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-truck-medical" style="color:#ef4444"></i><span>Ambulance</span><strong>108</strong></div>
+        <div class="detail-row"><i class="fa-solid fa-fire-extinguisher" style="color:#f97316"></i><span>Fire</span><strong>101</strong></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ══ TOOLTIP ══ -->
+<div id="tooltip" class="hidden">
+  <div id="tt-block">Block A</div>
+  <div id="tt-cat">South Premium</div>
+  <div class="tt-sep"></div>
+  <div id="tt-seats">Seats: <span>–</span></div>
+  <div id="tt-gate">Gate: <span>–</span></div>
+  <div id="tt-status"><span class="tt-dot"></span><span id="tt-status-txt">Available</span></div>
+</div>
+
+<!-- ══ COMPLAINT FAB ══ -->
+<button id="complaint-fab" title="Report an Issue"><i class="fa-solid fa-flag"></i></button>
+
+<!-- ══ COMPLAINT MODAL ══ -->
+<div id="complaint-overlay" style="display:none">
+  <div id="complaint-modal">
+    <div id="cm-header">
+      <h3><i class="fa-solid fa-flag"></i> Report an Issue</h3>
+      <button id="cm-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="complaint-form" novalidate>
+      <div class="ob-field">
+        <label class="ob-label"><i class="fa-solid fa-list"></i> Category</label>
+        <div id="complaint-cats">
+          <label class="cat-option"><input type="radio" name="complaint-cat" value="black_ticket"> <i class="fa-solid fa-ticket"></i> Black Ticket Selling</label>
+          <label class="cat-option"><input type="radio" name="complaint-cat" value="parking"> <i class="fa-solid fa-car"></i> Parking Issues</label>
+          <label class="cat-option"><input type="radio" name="complaint-cat" value="staff"> <i class="fa-solid fa-user-slash"></i> Staff Shortage</label>
+          <label class="cat-option"><input type="radio" name="complaint-cat" value="empty_seats"> <i class="fa-solid fa-couch"></i> Empty Seats</label>
+          <label class="cat-option"><input type="radio" name="complaint-cat" value="security"> <i class="fa-solid fa-shield-halved"></i> Security Problem</label>
+        </div>
+        <span class="ob-err" id="err-cat">Please select a category</span>
+      </div>
+      <div class="ob-field">
+        <label class="ob-label"><i class="fa-solid fa-pen"></i> Description (optional)</label>
+        <textarea id="complaint-desc" class="ob-input" rows="3" placeholder="Describe the issue briefly…" style="resize:vertical;min-height:70px"></textarea>
+      </div>
+      <button type="submit" id="cm-submit"><i class="fa-solid fa-paper-plane"></i> Submit Report</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══ WEATHER MODAL ══ -->
+<div id="weather-overlay" style="display:none">
+  <div id="weather-modal">
+    <div id="wm-header">
+      <div id="wm-title-wrap">
+        <h3><i class="fa-solid fa-cloud-sun"></i> 24-Hour Forecast</h3>
+        <p id="wm-location-name">Modi Stadium</p>
+      </div>
+      <button id="wm-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="wm-current">
+      <div id="wm-temp-main">28°C</div>
+      <div id="wm-cond-detail">Mostly Sunny · Humidity: 42%</div>
+    </div>
+    <div id="wm-hourly-container">
+      <div id="wm-hourly-list">
+        <!-- populated by JS -->
+      </div>
+    </div>
+    <div id="wm-footer">
+      <p><i class="fa-solid fa-circle-info"></i> Simulation based on live regional trends</p>
+    </div>
+  </div>
+</div>
+
+<script src="smart_stadium.js"></script>
+</body>
+</html>
