@@ -214,7 +214,7 @@ This project was built using AI tools:
 
 ## 🌐 Live Demo
 
-👉 https://app.netlify.com/projects/jazzy-flan-9d2293/agent-runs/69e2307afa29278dfa6e7695?session=69e231c1bee2c891d025e0dd
+👉 http://jazzy-flan-9d2293.netlify.app/
 
 ---
 
