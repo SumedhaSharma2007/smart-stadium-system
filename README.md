@@ -216,6 +216,9 @@ This project was built using AI tools:
 
 👉 http://creative-jelly-0f26c9.netlify.app/
 
+
+**Note:** Due to a temporary issue with activating Google Cloud credits using my registered email, deployment on Google Cloud Run could not be completed. The project is fully functional and hosted on an alternative platform.
+
 ---
 
 ## ⚙️ How to Run
