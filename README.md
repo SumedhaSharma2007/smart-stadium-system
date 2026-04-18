@@ -179,6 +179,33 @@ Users can report:
 
 ---
 
+
+## 🧪 Testing
+
+The application was tested manually for:
+
+- Navigation accuracy
+- UI responsiveness
+- Form input validation
+- Error handling
+
+All features were verified across different screen sizes.
+
+
+## 🤖 Google AI Integration
+
+This project was built using:
+
+- Google AI Studio for prompt-based development
+- Google Antigravity for UI generation
+
+AI was used to:
+- Generate UI components
+- Improve prompts iteratively
+- Build the smart stadium system
+
+This demonstrates intent-driven development using Google AI tools.
+
 ## 🤖 Prompt Engineering Approach
 
 This project was built using AI tools:
@@ -195,6 +222,27 @@ This project was built using AI tools:
 5. Final system with full smart stadium experience  
 
 ---
+
+
+## 🧪 Testing
+
+Manual testing was performed for:
+
+### ✅ Valid Cases
+- Block A–R works correctly
+- Valid seat numbers navigate properly
+- Correct gate shows route
+
+### ❌ Invalid Cases
+- Invalid block shows error
+- Seat out of range is rejected
+- Empty inputs are not allowed
+
+### 📱 Responsiveness Testing
+- Tested on mobile, tablet, desktop
+
+### 🎯 Result
+All features behave as expected with proper validation and error handling.
 
 ## 🛠️ Tech Stack
 
